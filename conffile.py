@@ -23,6 +23,10 @@ import string
 from carts import *
 from config import *
 
+# 
+# LEGACY CONFIG FILE
+# 
+
 def load_buttons_legacy(f):
 	buttons = []
 	
@@ -92,6 +96,49 @@ def load_buttons(f, version):
 def load_carts(f, version, controller, carts):
 	if version in ('0.1', '0.2'):
 		load_carts_legacy(f, controller, carts)
+
+# 
+# JSON CONFIG FILE
+# 
+
+def load_json(f):
+	return json.load(f)
+
+def load_buttons_json(json):
+	buttons = []
+	
+	for i in xrange(5):
+		buttons.append (( \
+			json[i]['title'], \
+			json[i]['color'], \
+			json[i]['highlight'], \
+		))
+	
+	return buttons
+
+def load_carts_json(json, controller, carts):
+	for x in xrange(5):
+		for row in xrange(ROWS):
+			for col in xrange(COLS):
+				i = row*COLS + col
+				carts[x].append(DummyCart())
+				try:
+					fname = AUDIODIR+json[x][str(i+1)]['aid']+AUDIOEXT
+					if json[x][str(i+1)]['submit'] == "1":
+						submit_id = int(json[x][str(i+1)]['aid'])
+					else:
+						submit_id = 0
+					carts[x][i] = AudioCart(self, fname, data[x][str(i+1)]['color'],
+						json[x][str(i+1)]['line1'],
+						json[x][str(i+1)]['line2'],
+						int(json[x][str(i+1)]['stops']),
+						0,
+						submit_id
+					)
+				except KeyError, e:
+					pass
+				
+				self.carts[x][i].grid(in_=controller.frames[x], row=row, column=col)
 
 
 
