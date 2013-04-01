@@ -1,4 +1,4 @@
-Cartwall v 0.2 by Thomas Preece
+Cartwall v 0.3 by Thomas Preece
 http://tpreece.net
 thomas@tpreece.net
 
@@ -61,6 +61,8 @@ format.
 
 VERSION HISTORY
 ===============
+
+v 0.3 (2013-04-01) - ported some changes made by URN - these are untested
 
 v 0.2 (2013-03-21) - first published version
 
