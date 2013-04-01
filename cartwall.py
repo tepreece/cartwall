@@ -55,24 +55,28 @@ class Gui:
 		self.frames.append(Frame(bg='black', width=500, height=500))
 		
 		# open and process the config file
+		self.carts = [[], [], [], [], []]
 		f = open(CONFIGFILE, 'r')
 		
-		# find out which version of the config file we're using
-		versionline = string.strip(f.readline())
-		(appname, version) = string.split(versionline, None, 1)
-		
-		self.carts = [[], [], [], [], []]
-		
-		if appname != APPNAME:
-			# legacy config file
-			f.seek(0, 0) # go back to the beginning of the file
-			print 'WARNING: using legacy config. Please update your config file.'
-			btnconf = conffile.load_buttons_legacy(f)
-			conffile.load_carts_legacy(f, self, self.carts)
+		if CONFIG_LEGACY:
+			# find out which version of the config file we're using
+			versionline = string.strip(f.readline())
+			(appname, version) = string.split(versionline, None, 1)
+			
+			if appname != APPNAME:
+				# legacy config file
+				f.seek(0, 0) # go back to the beginning of the file
+				print 'WARNING: using legacy config. Please update your config file.'
+				btnconf = conffile.load_buttons_legacy(f)
+				conffile.load_carts_legacy(f, self, self.carts)
+			else:
+				# config file with version number
+				btnconf = conffile.load_buttons(f, version)
+				conffile.load_carts(f, version, self, self.carts)
 		else:
-			# config file with version number
-			btnconf = conffile.load_buttons(f, version)
-			conffile.load_carts(f, version, self, self.carts)
+			json = conffile.load_json(f)
+			btnconf = conffile.load_buttons_json(json)
+			conffile.load_carts_json(json, self. self.carts)
 		
 		f.close()
 		

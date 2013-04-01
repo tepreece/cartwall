@@ -36,6 +36,9 @@ SAMPLERATE = 44100
 # Where is the configuration file?
 CONFIGFILE = './cartwall.conf'
 
+# Is it a legacy or JSON config file?
+CONFIG_LEGACY = True
+
 # Where are the audio files stored? You must add a trailing slash.
 AUDIODIR = './'
 
