@@ -21,7 +21,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import audiere
+import audio
 import string
 import sys
 import os
@@ -43,7 +43,7 @@ class Gui:
 		self.hotkeys = {}
 		
 		# open the audio device
-		self.audio = audiere.open_device()
+		self.audio = audio.Audio()
 		
 		# create the frames
 		self.frames = []

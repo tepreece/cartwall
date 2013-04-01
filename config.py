@@ -23,6 +23,11 @@
 # You can customize your Cartwall by changing the rest of this file.
 # 
 
+# By default we try to use Audiere, but we can also use GStreamer. If you have
+# both installed, you can specify which you prefer here. NB. GStreamer support
+# appears to be a little buggy at the moment...
+PREFER_GSTREAMER = False
+
 # Audio sample rate. You should usually leave this as 44100 unless you know
 # you need something different. Note that if your audio files are encoded at a
 # different sample rate, they will play back at the wrong speed.
