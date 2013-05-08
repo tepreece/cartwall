@@ -113,11 +113,11 @@ class AudioCart(Canvas):
 		color = 0
 		
 		# change elements depending on whether the audio is playing
-		if (self.audio.is_playing()):
+		if (self.audio.playing):
 			self.itemconfig(self.stopicon, state=HIDDEN)
 			self.itemconfig(self.playicon, state=NORMAL)
 			color = PLAY_COLOR
-			position = self.audio.position()
+			position = self.audio.position
 		else:
 			self.itemconfig(self.stopicon, state=NORMAL)
 			self.itemconfig(self.playicon, state=HIDDEN)
@@ -125,7 +125,8 @@ class AudioCart(Canvas):
 			position = 0
 		
 		# work out human-readable time remaining
-		pos = (self.audio.length() - position) / RATE
+		pos = self.audio.length - position
+		#pos = (self.audio.length() - position) / RATE
 		time = '-%1.1f' % pos
 		if SHOW_MINUTES and pos > 60:
 			minutes, seconds = divmod(pos, 60)			
@@ -142,14 +143,14 @@ class AudioCart(Canvas):
 				self.ticks_left = 4
 				self.flash_on = not self.flash_on
 				
-		if (self.audio.is_playing() and not self.flash_on):
+		if self.audio.playing and not self.flash_on:
 			color=EOF_COLOR
 		
 		# set the correct color
 		self.itemconfig(self.bgrect, fill=color)
 	
 	def onClick(self, event):
-		if (self.audio.is_playing()):
+		if self.audio.playing:
 			self.stop()
 		else:
 			self.play()

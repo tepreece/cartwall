@@ -21,11 +21,11 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import audio
 import string
 import sys
 import os
 from Tkinter import *
+from playstopaudio import playstopaudio
 
 from config import *
 import conffile
@@ -43,7 +43,7 @@ class Gui:
 		self.hotkeys = {}
 		
 		# open the audio device
-		self.audio = audio.Audio()
+		self.audio = playstopaudio.audio(AUDIO_LIBRARIES)
 		
 		# create the frames
 		self.frames = []
