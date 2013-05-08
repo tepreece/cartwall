@@ -1,4 +1,4 @@
-Cartwall v 0.3 by Thomas Preece
+Cartwall v 0.4 by Thomas Preece
 http://tpreece.net
 thomas@tpreece.net
 
@@ -6,9 +6,19 @@ DESCRIPTION
 ===========
 
 This is a cartwall program as used at URN. I'll write some better documentation
-later. For now, just drop a file "1.ogg" into this directory, and run it to see
-what happens. You can change what carts are played by editing cartwall.conf -
-although the file format is very opaque at the moment.
+later.
+
+To get it up and running, you will need an audio library (either GStreamer or
+Audiere), and playstopaudio, which you can get from
+https://github.com/tepreece/playstopaudio
+
+Copy the 'playstopaudio' directory into this directory, or place it in your
+Python site_packages directory. You will also need to drop a file called
+"1.ogg" into this directory.
+
+Then run ./cartwall.py to see what happens. You can change what carts are
+played by editing cartwall.conf - although the file format is very opaque
+at the moment. Improvements are in the pipeline right now.
 
 USAGE INSTRUCTIONS
 ==================
@@ -61,6 +71,8 @@ format.
 
 VERSION HISTORY
 ===============
+
+v 0.4 (2013-05-08) - replace audio code with playstopaudio library
 
 v 0.3 (2013-04-01) - ported some changes made by URN - these are untested
 
