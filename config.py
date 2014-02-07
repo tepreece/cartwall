@@ -170,7 +170,7 @@ SHOW_MINUTES = False
 # Typically you might build a URI of a script on your media management server
 # and then call wget to fetch that URI, notifying the server that the audio
 # has been played.
-def submit_play(audio_id):
+def submit_play(audiofile):
 	pass
 
 # This function is called whenever a "fire command" function is played on a

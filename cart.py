@@ -24,6 +24,16 @@ from config import *
 
 RATE = float(SAMPLERATE) + 0.0
 
+def load_images():
+	global stopotherimage, submitimage, commandimage
+	stopotherimage = PhotoImage(file=STOPOTHER_IMAGE)
+	submitimage = PhotoImage(file=SUBMIT_IMAGE)
+	commandimage = PhotoImage(file=COMMAND_IMAGE)
+
+stopotherimage = None
+submitimage = None
+commandimage= None
+
 class NullSound():
 	def __init__(self):
 		self.length = 0
@@ -41,13 +51,14 @@ class Cart(Canvas):
 	def set_json(self, json):
 		self.json = json
 		
-		print json
-		
 		if json is None:
 			self.bgcolor = EMPTY_COLOR
 			self.fgcolor = EMPTY_COLOR
 			self.title = ''
 			self.subtitle = ''
+			self.stopother = -1
+			self.command = ''
+			self.submit_play = False
 			self.audiofile = ''
 			self.sound = NullSound()
 			self.click_enabled = False
@@ -60,6 +71,7 @@ class Cart(Canvas):
 				self.fgcolor = json['fgcolor']
 			except KeyError:
 				self.fgcolor = FG_COLOR
+			
 			try:
 				self.title = json['title']
 			except KeyError:
@@ -74,6 +86,24 @@ class Cart(Canvas):
 					self.subtitle = json['subtitle']
 				except KeyError:
 					self.subtitle = ''
+			
+			try:
+				self.stopother = json['stopother']
+			except KeyError:
+				try:
+					self.stopother = json['stops']
+				except KeyError:
+					self.stopother = -1
+			
+			try:
+				self.command = json['command']
+			except KeyError:
+				self.command = ''
+			
+			try:
+				self.submit_play = (json['submit_play'] in ('True', 'true')) or (int(json['submit_play'] != 0))
+			except KeyError:
+				self.submit_play = False
 			
 			try:
 				self.audiofile = json['audiofile']
@@ -125,6 +155,12 @@ class Cart(Canvas):
 			state=HIDDEN
 		)
 		
+		self._stopimage = self.create_image(STOPOTHER_X, STOPOTHER_Y, image=stopotherimage, anchor=SW)
+		
+		self._submitimage = self.create_image(SUBMIT_X, SUBMIT_Y, image=submitimage, anchor=SW)
+		
+		self._commandimage = self.create_image(COMMAND_X, COMMAND_Y, image=commandimage, anchor=SW)
+		
 		self._title = self.create_text(CAP1_X, CAP1_Y, text=self.title, anchor=NW, font=CAP1_FONT, fill=self.fgcolor)
 		self._subtitle = self.create_text(CAP2_X, CAP2_Y, text=self.subtitle, anchor=NW, font=CAP2_FONT, fill=self.fgcolor)
 		self._timer = self.create_text(TIMER_X, TIMER_Y, text="-X", anchor=SE, font=TIMER_FONT, fill=self.fgcolor)
@@ -141,6 +177,15 @@ class Cart(Canvas):
 	def update(self):
 		position = 0
 		color = 0
+		
+		# show and hide images
+		stopstate = (self.stopother == -1) and HIDDEN or NORMAL
+		submitstate = (self.submit_play) and NORMAL or HIDDEN
+		commandstate = (self.command == '') and HIDDEN or NORMAL
+		
+		self.itemconfig(self._stopimage, state=stopstate)
+		self.itemconfig(self._submitimage, state=submitstate)
+		self.itemconfig(self._commandimage, state=commandstate)
 		
 		# change elements depending on whether the audio is playing
 		if (self.sound.playing):
@@ -191,15 +236,17 @@ class Cart(Canvas):
 			self.play()
 	
 	def play(self):
-		#if (self.stopother!=-1):
-		#	self.controller.stop(self.stopother)
+		if self.stopother != -1:
+			self.controller.stop(self.stopother)
 		self.sound.play()
-		#self.controller.fire_cmd(self.cmd)
 		self.flash_on = True
 		self.ticks_left = 1
 		self.update()
-		#if (self.submit!=0):
-		#	submit_play(self.submit)
+		
+		# do these last, as they may take a while
+		self.controller.fire_cmd(self.command)
+		if self.submit_play:
+			self.controller.submit_play(self.audiofile)
 	
 	def stop(self):
 		self.sound.stop()

@@ -62,27 +62,6 @@ class Gui:
 		self.json = json.load(f)
 		f.close()
 		
-		"""
-		if CONFIG_LEGACY:
-			# find out which version of the config file we're using
-			versionline = string.strip(f.readline())
-			(appname, version) = string.split(versionline, None, 1)
-			
-			if appname != APPNAME:
-				# legacy config file
-				f.seek(0, 0) # go back to the beginning of the file
-				print 'WARNING: using legacy config. Please update your config file.'
-				btnconf = conffile.load_buttons_legacy(f)
-				conffile.load_carts_legacy(f, self, self.carts)
-			else:
-				# config file with version number
-				btnconf = conffile.load_buttons(f, version)
-				conffile.load_carts(f, version, self, self.carts)
-		else:
-			json = conffile.load_json(f)
-			btnconf = conffile.load_buttons_json(json)
-			conffile.load_carts_json(json, self. self.carts)
-		"""
 		# create the carts
 		for x in xrange(5):
 			for row in xrange(ROWS):
@@ -166,9 +145,7 @@ class Gui:
 		self.activebutton = self.buttons[0]
 		self.activeindex = 0
 		self.select_page(0)
-
-		# bind key press
-		root.bind('<KeyPress>', self.keyPress)
+		
 		# start timer
 		self.tick()
 		
@@ -193,23 +170,23 @@ class Gui:
 		self.master.after(100, self.tick)
 	
 	def stop(self, item, page=-1):
-		# it's usually a fair assumption that the intended page
-		# is the currently active page, if it's not specified
+		# It's usually a fair assumption that the intended page
+		# is the currently active page, if it's not specified.
+		# In fact, that's all the Cart object can do so far...
 		if page==-1:
 			page = self.activeindex
 		self.carts[page][item].stop()
 	
 	def fire_cmd(self, cmd):
-		run_command(cmd)
-
-	def keyPress(self, event):
 		try:
-			c = str(int(event.char))
-			item = self.hotkeys[c]
-			page = item[0]
-			cart = item[1]
-			self.carts[page][cart].onClick(event)
-		except:
+			run_command(cmd)
+		except NameError:
+			pass
+	
+	def submit_play(self, audiofile):
+		try:
+			submit_play(audiofile)
+		except NameError:
 			pass
 		
 
@@ -229,7 +206,7 @@ def logout():
 	exitcode = 0
 	root.quit()
 
-#load_images()
+cart.load_images()
 app = Gui(root)
 root.title('Cartwall')
 root.mainloop()
