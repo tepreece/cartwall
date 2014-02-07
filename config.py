@@ -24,7 +24,7 @@
 # 
 
 # Specify the audio libraries for playstopaudio to try
-AUDIO_LIBRARIES = ['gstreamer', 'audiere']
+AUDIO_LIBRARIES = ['audiere']
 
 # Audio sample rate. You should usually leave this as 44100 unless you know
 # you need something different. Note that if your audio files are encoded at a
@@ -32,10 +32,10 @@ AUDIO_LIBRARIES = ['gstreamer', 'audiere']
 SAMPLERATE = 44100
 
 # Where is the configuration file?
-CONFIGFILE = './cartwall.conf'
+CONFIGFILE = './carts.json'
 
 # Is it a legacy or JSON config file?
-CONFIG_LEGACY = True
+CONFIG_LEGACY = False
 
 # Where are the audio files stored? You must add a trailing slash.
 AUDIODIR = './'
@@ -73,6 +73,10 @@ EOF_TIME = 5
 # are defined here. The "HL" (highlight) color is used when for the active page.
 LEGACY_BTN_COLOR = ('#f44e15','#f44e15', '#497ed6', '#497ed6', '#497ed6')
 LEGACY_BTN_HL = ('#f49b7b', '#f49b7b', '#8ea7e6', '#8ea7e6', '#8ea7e6')
+
+# Default button colours
+BTN_COLOR = '#f44e15'
+BTN_HL = '#f49b7b'
 
 # Colors for the small buttons (Refresh / Log Out)
 SMALLBTN_COLOR = 'white'

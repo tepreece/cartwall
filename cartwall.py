@@ -21,6 +21,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import json
 import string
 import sys
 import os
@@ -29,9 +30,10 @@ from playstopaudio import playstopaudio
 
 from config import *
 import conffile
-from carts import *
+import cart
 
-APPNAME = '~~CARTWALL~~'
+BTNCOL = range(5)
+BTNHL = range(5)
 
 class Gui:
 	def __init__(self, master):
@@ -57,7 +59,10 @@ class Gui:
 		# open and process the config file
 		self.carts = [[], [], [], [], []]
 		f = open(CONFIGFILE, 'r')
+		self.json = json.load(f)
+		f.close()
 		
+		"""
 		if CONFIG_LEGACY:
 			# find out which version of the config file we're using
 			versionline = string.strip(f.readline())
@@ -77,17 +82,28 @@ class Gui:
 			json = conffile.load_json(f)
 			btnconf = conffile.load_buttons_json(json)
 			conffile.load_carts_json(json, self. self.carts)
-		
-		f.close()
+		"""
+		# create the carts
+		for x in xrange(5):
+			for row in xrange(ROWS):
+				for col in xrange(COLS):
+					i = row*COLS + col
+					i_ = str(i+1)
+					try:
+						j = self.json[x][i_]
+					except KeyError:
+						j = None
+					self.carts[x].append(cart.Cart(self, self.audio, j))
+					self.carts[x][i].grid(in_=self.frames[x], row=row, column=col)
+					#break
+				#break
+			#break
 		
 		# create the buttons
-		self.buttons = []	
+		self.buttons = []
 		
 		bfont = BTN_FONT
 		smallbfont = SMALLBTN_FONT
-		
-		BTNCOL = [x[1] for x in btnconf]
-		BTNHL = [x[2] for x in btnconf]
 		
 		# we have to define the lambda functions outside of the loop
 		# because otherwise the "i" is taken from the loop's scope and will
@@ -101,16 +117,25 @@ class Gui:
 		)
 		
 		for i in xrange(5):
+			try:
+				BTNCOL[i] = self.json[i]['color']
+			except KeyError:
+				BTNCOL[i] = BTN_COLOR
+			try:
+				BTNHL[i] = self.json[i]['highlight']
+			except KeyError:
+				BTNHL[i] = BTN_HL
+			
 			self.buttons.append(Button(
-				text=btnconf[i][0],
+				text=self.json[i]['title'],
 				width=1, height=BTN_HEIGHT, borderwidth=BTN_BORDER,
 				takefocus=False,
 				font=bfont, wraplength=BTN_WRAPLENGTH,
-				bg=btnconf[i][1],
-				activebackground=btnconf[i][1],
+				bg=BTNCOL[i],
+				activebackground=BTNCOL[i],
 				command=select_page_lambda[i]
 			))
-
+		
 		self.buttons.append(Button(
 			text=REFRESH,
 			width=REFRESH_WIDTH, height=SMALLBTN_HEIGHT, borderwidth=SMALLBTN_BORDER,
@@ -204,7 +229,7 @@ def logout():
 	exitcode = 0
 	root.quit()
 
-load_images()
+#load_images()
 app = Gui(root)
 root.title('Cartwall')
 root.mainloop()

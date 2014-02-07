@@ -1,5 +1,6 @@
 playstopaudio
 playstopaudio/*
+*.json
 *.pyc
 *.flac
 *.ogg
