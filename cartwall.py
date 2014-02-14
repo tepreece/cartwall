@@ -29,20 +29,18 @@ from Tkinter import *
 from playstopaudio import playstopaudio
 
 from config import *
-import conffile
 import cart
 
 BTNCOL = range(5)
 BTNHL = range(5)
 
 class Gui:
-	def __init__(self, master):
+	def __init__(self, master, fname):
 		global BTNCOL, BTNHL
-		# save the master
+		# save the master, and filename
 		self.master = master
-		
-		# set up hotkeys
-		self.hotkeys = {}
+		self.fname = fname
+		self.modified = False
 		
 		# open the audio device
 		self.audio = playstopaudio.audio(AUDIO_LIBRARIES)
@@ -58,7 +56,7 @@ class Gui:
 		
 		# open and process the config file
 		self.carts = [[], [], [], [], []]
-		f = open(CONFIGFILE, 'r')
+		f = open(self.fname, 'r')
 		self.json = json.load(f)
 		f.close()
 		
@@ -67,19 +65,17 @@ class Gui:
 			for row in xrange(ROWS):
 				for col in xrange(COLS):
 					i = row*COLS + col
-					i_ = str(i+1)
+					i_ = str(i)
 					try:
 						j = self.json[x][i_]
-					except KeyError:
+					except:
 						j = None
 					self.carts[x].append(cart.Cart(self, self.audio, j))
 					self.carts[x][i].grid(in_=self.frames[x], row=row, column=col)
-					#break
-				#break
-			#break
 		
 		# create the buttons
 		self.buttons = []
+		self.buttontitles = []
 		
 		bfont = BTN_FONT
 		smallbfont = SMALLBTN_FONT
@@ -98,15 +94,20 @@ class Gui:
 		for i in xrange(5):
 			try:
 				BTNCOL[i] = self.json[i]['color']
-			except KeyError:
+			except:
 				BTNCOL[i] = BTN_COLOR
 			try:
 				BTNHL[i] = self.json[i]['highlight']
-			except KeyError:
+			except:
 				BTNHL[i] = BTN_HL
+			try:
+				title = self.json[i]['title']
+			except:
+				title = 'Page '+str(i+1)
 			
+			self.buttontitles.append(title)
 			self.buttons.append(Button(
-				text=self.json[i]['title'],
+				text=title,
 				width=1, height=BTN_HEIGHT, borderwidth=BTN_BORDER,
 				takefocus=False,
 				font=bfont, wraplength=BTN_WRAPLENGTH,
@@ -115,7 +116,7 @@ class Gui:
 				command=select_page_lambda[i]
 			))
 		
-		self.buttons.append(Button(
+		self.reloadbutton = Button(
 			text=REFRESH,
 			width=REFRESH_WIDTH, height=SMALLBTN_HEIGHT, borderwidth=SMALLBTN_BORDER,
 			takefocus=False,
@@ -123,7 +124,9 @@ class Gui:
 			bg=SMALLBTN_COLOR,
 			activebackground=SMALLBTN_HL,
 			command=refresh
-		))
+		)
+		
+		self.buttons.append(self.reloadbutton)
 		self.buttons.append(Button(
 			text=LOGOUT,
 			width=LOGOUT_WIDTH, height=SMALLBTN_HEIGHT, borderwidth=SMALLBTN_BORDER,
@@ -145,7 +148,7 @@ class Gui:
 		self.activebutton = self.buttons[0]
 		self.activeindex = 0
 		self.select_page(0)
-		
+
 		# start timer
 		self.tick()
 		
@@ -177,6 +180,35 @@ class Gui:
 			page = self.activeindex
 		self.carts[page][item].stop()
 	
+	def set_modified(self, modified):
+		if modified:
+			self.modified = True
+			self.reloadbutton.config(text=SAVE)
+		else:
+			self.modified = False
+			self.reloadbutton.config(text=REFRESH)
+	
+	def save(self):
+		self.json = []
+		for x in xrange(5):
+			self.json.append({
+				'id' : x,
+				'title' : self.buttontitles[x],
+				'color' : BTNCOL[x],
+				'highlight' : BTNHL[x]
+			})
+			
+			for i in xrange(36):
+				self.json[x][i] = self.carts[x][i].get_json()
+		#for x in xrange(5):
+		#	for i in xrange(36):
+		#		self.json[x][i] = self.carts[x][i].get_json()
+		
+		f = open(self.fname, 'w')
+		json.dump(self.json, f)
+		f.close()
+		self.set_modified(False)
+	
 	def fire_cmd(self, cmd):
 		try:
 			run_command(cmd)
@@ -195,10 +227,13 @@ root = Tk()
 exitcode = 0
 
 def refresh():
-	global root, exitcode
-	print 'refresh'
-	exitcode = 1
-	root.quit()
+	global app, root, exitcode
+	if app.modified:
+		app.save()
+	else:
+		print 'refresh'
+		exitcode = 1
+		root.quit()
 
 def logout():
 	global root, exitcode
@@ -207,7 +242,7 @@ def logout():
 	root.quit()
 
 cart.load_images()
-app = Gui(root)
+app = Gui(root, CONFIGFILE)
 root.title('Cartwall')
 root.mainloop()
 

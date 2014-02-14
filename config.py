@@ -103,6 +103,7 @@ SMALLBTN_WRAPLENGTH = 100						# Wrap length for the button text
 
 # Texts for the Refresh and Log Out buttons
 REFRESH = 'Refresh'
+SAVE = 'Save'
 LOGOUT = 'Log Out'
 
 # Cart layout. All of these settings define what a cart looks like and how the

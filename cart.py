@@ -19,6 +19,8 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import carteditor
+
 from Tkinter import *
 from config import *
 
@@ -36,9 +38,25 @@ commandimage= None
 
 class NullSound():
 	def __init__(self):
-		self.length = 0
+		self.length = 5
 		self.position = 0
-		self.playing = False
+		self._playing = False
+		self.is_nullsound = True
+	
+	def play(self):
+		self._playing = True
+		self.position = 0
+	
+	def stop(self):
+		self._playing = False
+		self.position = 0
+	
+	def __getattr__(self, attr):
+		if attr == 'playing':
+			self.position += 1
+			if self.position > self.length:
+				self._playing = False
+			return self._playing
 
 class Cart(Canvas):
 	def __init__(self, controller, audio, json):
@@ -47,6 +65,10 @@ class Cart(Canvas):
 		self.set_json(json)
 		self.setup_display()
 		self.bind('<Button-1>', self.onClick)
+		self.bind("<Button-3>", self.popup)
+		
+		self.menu = Menu(self, tearoff=0)
+		self.menu.add_command(label="Edit...", command=self.edit)
 	
 	def set_json(self, json):
 		self.json = json
@@ -61,7 +83,6 @@ class Cart(Canvas):
 			self.submit_play = False
 			self.audiofile = ''
 			self.sound = NullSound()
-			self.click_enabled = False
 		else:
 			try:
 				self.bgcolor = json['color']
@@ -112,12 +133,7 @@ class Cart(Canvas):
 					self.audiofile = json['aid'] + AUDIOEXT
 				except KeyError:
 					self.audiofile = ''
-			print self.audiofile
-			if self.audiofile != '':
-				try:
-					self.sound = self.audio.open_file(AUDIODIR + self.audiofile)
-				except:
-					self.audiofile = None
+			self.loadaudio()	
 			
 			self.click_enabled = True
 	
@@ -128,6 +144,14 @@ class Cart(Canvas):
 		json['title'] = self.title
 		json['subtitle'] = self.subtitle
 		json['audiofile'] = self.audiofile
+		
+		return json
+	
+	def loadaudio(self):
+		try:
+			self.sound = self.audio.open_file(AUDIODIR + self.audiofile)
+		except:
+			self.sound = NullSound()
 	
 	def setup_display(self):
 		# create the canvas
@@ -187,38 +211,55 @@ class Cart(Canvas):
 		self.itemconfig(self._submitimage, state=submitstate)
 		self.itemconfig(self._commandimage, state=commandstate)
 		
-		# change elements depending on whether the audio is playing
-		if (self.sound.playing):
+		nullsound = False
+		try:
+			nullsound = self.sound.is_nullsound
+		except:
+			nullsound = False
+		
+		if nullsound:
 			self.itemconfig(self._stopicon, state=HIDDEN)
-			self.itemconfig(self._playicon, state=NORMAL)
-			color = PLAY_COLOR
-			position = self.sound.position
-		else:
-			self.itemconfig(self._stopicon, state=NORMAL)
 			self.itemconfig(self._playicon, state=HIDDEN)
-			color = self.bgcolor
-			position = 0
+			self.itemconfig(self._timer, state=HIDDEN)
+			
+			if self.sound.playing:
+				color = PLAY_COLOR
+			else:
+				color = self.bgcolor
+		else:
+			# change elements depending on whether the audio is playing
+			if self.sound.playing:
+				self.itemconfig(self._stopicon, state=HIDDEN)
+				self.itemconfig(self._playicon, state=NORMAL)
+				color = PLAY_COLOR
+				position = self.sound.position
+			else:
+				self.itemconfig(self._stopicon, state=NORMAL)
+				self.itemconfig(self._playicon, state=HIDDEN)
+				color = self.bgcolor
+				position = 0
 		
-		# work out human-readable time remaining
-		pos = self.sound.length - position
-		time = '-%1.1f' % pos
-		if SHOW_MINUTES and pos > 60:
-			minutes, seconds = divmod(pos, 60)			
-			tenths = (seconds - int(seconds)) * 10
-			time = '-%d:%02d.%d' % (minutes, seconds, tenths)
-		if time=='--0.0':
-			time = '-0.0'
-		self.itemconfig(self._timer, text=time)
+			# work out human-readable time remaining
+			pos = self.sound.length - position
+			time = '-%1.1f' % pos
+			if SHOW_MINUTES and pos > 60:
+				minutes, seconds = divmod(pos, 60)			
+				tenths = (seconds - int(seconds)) * 10
+				time = '-%d:%02d.%d' % (minutes, seconds, tenths)
+			if time=='--0.0':
+				time = '-0.0'
+			self.itemconfig(self._timer, state=NORMAL)
+			self.itemconfig(self._timer, text=time)
 		
-		# deal with EOF flashing
-		if (pos<=EOF_TIME):
-			self.ticks_left -= 1
-			if (self.ticks_left == 0):
-				self.ticks_left = 4
-				self.flash_on = not self.flash_on
+			# deal with EOF flashing
+			if (pos<=EOF_TIME):
+				self.ticks_left -= 1
+				if (self.ticks_left == 0):
+					self.ticks_left = 4
+					self.flash_on = not self.flash_on
 				
-		if self.sound.playing and not self.flash_on:
-			color=EOF_COLOR
+			if self.sound.playing and not self.flash_on:
+				color=EOF_COLOR
 		
 		# set the correct color
 		self.itemconfig(self._bgrect, fill=color)
@@ -228,12 +269,13 @@ class Cart(Canvas):
 		self.itemconfig(self._subtitle, text=self.subtitle)
 	
 	def onClick(self, event):
-		if not self.click_enabled: return False
-		
 		if self.sound.playing:
 			self.stop()
 		else:
 			self.play()
+	
+	def popup(self, event):
+		self.menu.post(event.x_root, event.y_root)
 	
 	def play(self):
 		if self.stopother != -1:
@@ -251,6 +293,9 @@ class Cart(Canvas):
 	def stop(self):
 		self.sound.stop()
 		self.update()
+	
+	def edit(self):
+		ce = carteditor.CartEditor(self.controller.master, self)
 
 
 

@@ -22,8 +22,9 @@
 from Tkinter import *
 
 class CartEditor():
-	def __init__(self, root):
+	def __init__(self, root, cart):
 		self.root = root
+		self.cart = cart
 		
 		self.top = Toplevel()
 		self.top.title('Edit Cart')
@@ -33,10 +34,12 @@ class CartEditor():
 		Label(body, text='Title:').grid(in_=body, row=0, column=0, sticky=E)
 		self.title = Entry(body)
 		self.title.grid(in_=body, row=0, column=1)
+		self.title.insert(0, cart.title)
 		
 		Label(body, text='Subtitle:').grid(in_=body, row=1, column=0, sticky=E)
 		self.subtitle = Entry(body)
 		self.subtitle.grid(in_=body, row=1, column=1)
+		self.subtitle.insert(0, cart.subtitle)
 		
 		Label(body, text='Audio Directory:').grid(in_=body, row=2, sticky=E)
 		Label(body, text='/somewhere/').grid(in_=body, row=2, column=1, sticky=W)
@@ -44,26 +47,33 @@ class CartEditor():
 		Label(body, text='Audio File:').grid(in_=body, row=3, sticky=E)
 		self.audiofile = Entry(body)
 		self.audiofile.grid(in_=body, row=3, column=1)
+		self.audiofile.insert(0, cart.audiofile)
 		
 		Label(body, text='BG Color:').grid(in_=body, row=4, sticky=E)
-		self.color = Entry(body)
-		self.color.grid(in_=body, row=4, column=1)
+		self.bgcolor = Entry(body)
+		self.bgcolor.grid(in_=body, row=4, column=1)
+		self.bgcolor.insert(0, cart.bgcolor)
 		
 		Label(body, text='FG Color:').grid(in_=body, row=5, sticky=E)
 		self.fgcolor = Entry(body)
 		self.fgcolor.grid(in_=body, row=5, column=1)
+		self.fgcolor.insert(0, cart.fgcolor)
 		
 		Label(body, text='Stop Cart:').grid(in_=body, row=6, sticky=E)
 		self.stopother = Entry(body)
 		self.stopother.grid(in_=body, row=6, column=1)
+		if cart.stopother >= 0:
+			self.stopother.insert(0, str(cart.stopother))
 		
 		Label(body, text='Command:').grid(in_=body, row=7, sticky=E)
 		self.command = Entry(body)
 		self.command.grid(in_=body, row=7, column=1)
+		self.command.insert(0, cart.command)
 		
 		self.submit_play = IntVar()
 		Checkbutton(body, text="Submit Play", variable=self.submit_play)\
 			.grid(in_=body, row=8, column=1, sticky=W)
+		self.submit_play.set(cart.submit_play and 1 or 0)
 		
 		box = Frame(self.top)
 
@@ -83,18 +93,29 @@ class CartEditor():
 		self.root.wait_window(self.top)
 	
 	def ok(self, event=None):
-		print 'ok'
+		self.cart.title = self.title.get()
+		self.cart.subtitle = self.subtitle.get()
+		self.cart.audiofile = self.audiofile.get()
+		self.cart.bgcolor = self.bgcolor.get()
+		self.cart.fgcolor = self.fgcolor.get()
+		self.cart.command = self.command.get()
+		stopother = self.stopother.get()
+		self.cart.submit_play = (self.submit_play.get() and True or False)
+		
+		try:
+			intstopother = int(stopother)
+		except:
+			intstopother = -1
+		if intstopother < 0: intstopother = -1
+		self.cart.stopother = intstopother
+		
+		self.cart.loadaudio()
+		self.cart.update()
+		self.cart.controller.set_modified(True)
+		self.top.destroy()
 	
 	def cancel(self, event=None):
 		self.top.destroy()
-		
-if __name__ == '__main__':
-	root = Tk()
-	e = Entry(root)
-	e.pack()
-	
-	CartEditor(root)
-
 
 
 
