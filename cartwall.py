@@ -46,7 +46,8 @@ class PageButton(Button):
 		self.bind('<Button-3>', self.popup)
 	
 	def popup(self, event):
-		self.menu.post(event.x_root, event.y_root)
+		if ALLOW_EDITING:
+			self.menu.post(event.x_root, event.y_root)
 	
 	def edit(self):
 		buttoneditor.ButtonEditor(self.root, self)
@@ -184,8 +185,17 @@ class Gui:
 		self.select_page(0)
 		
 		if show_welcome:
-			tkMessageBox.showinfo('Welcome to Cartwall!',
-			'Welcome to Cartwall!\n\nYou\'re editing a new cartwall - right-click any cart or page button to edit it!')
+			if ALLOW_EDITING:
+				tkMessageBox.showinfo('Welcome to Cartwall!',
+				  'Welcome to Cartwall!\n\nYou\'re editing a new cartwall - '+\
+				  'right-click any cart or page button to edit it!')
+			else:
+				tkMessageBox.showerror('Cartwall',
+				  'You\'re trying to open a blank cartwall, but editing is '+\
+				  'disabled - this isn\'t possible.\n\nTry enabling editing '+\
+				  'in config.py (ALLOW_EDITING = True), or try a different '+\
+				  'filename.')
+				sys.exit(0)
 
 		# start timer
 		self.tick()

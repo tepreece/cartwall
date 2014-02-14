@@ -38,6 +38,10 @@ SAMPLERATE = 44100
 # Where are the audio files stored? You must include a trailing slash.
 AUDIODIR = './'
 
+# Do we want to allow editing? Perhaps not if it's in a studio environment, and
+# we have some other way of editing, like a web interface.
+ALLOW_EDITING = True
+
 # Default colors
 EMPTY_COLOR = 'black'	# Color of an empty cart
 BG_COLOR = 'cyan'		# Default background color

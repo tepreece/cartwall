@@ -276,7 +276,8 @@ class Cart(Canvas):
 			self.play()
 	
 	def popup(self, event):
-		self.menu.post(event.x_root, event.y_root)
+		if ALLOW_EDITING:
+			self.menu.post(event.x_root, event.y_root)
 	
 	def play(self):
 		if self.stopother != -1:
