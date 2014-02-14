@@ -1,25 +1,12 @@
-Cartwall v 0.4 by Thomas Preece
+Cartwall v 0.5 by Thomas Preece
 http://tpreece.net
 thomas@tpreece.net
 
 DESCRIPTION
 ===========
 
-This is a cartwall program as used at URN. I'll write some better documentation
-later.
-
-To get it up and running, you will need an audio library (either GStreamer or
-Audiere), and playstopaudio, which you can get from
-https://github.com/tepreece/playstopaudio
-
-Copy the 'playstopaudio' directory into this directory, or place it in your
-Python site_packages directory. You will also need to drop a file called
-"1.ogg" into this directory.
-
-Then run ./cartwall.py to see what happens. You can change what carts are
-played by editing cartwall.conf - although the file format is very opaque
-at the moment. Improvements are in the pipeline right now.
-
+This is a cartwall program as used at URN and modified by me afterwards. I'll
+write some better documentation later.
 USAGE INSTRUCTIONS
 ==================
 
@@ -36,19 +23,49 @@ cause your organisation to lose lots of money, you can probably afford
 the professional equipment anyway - please use it. Otherwise, please 
 read on.
 
+To get it up and running, you will need a backend audio library (either
+GStreamer or Audiere), and playstopaudio, which you can get from
+https://github.com/tepreece/playstopaudio
+
+Copy the 'playstopaudio' directory into this directory, or place it in your
+Python site_packages directory. Also drop some audio files into this directory.
+
+Have a quick read through config.py and make sure it all looks in order. You
+probably won't need to change any of the defaults for now, but the options are
+there and are documented in case you need to - with the exception that you must
+set CONFIG_SET = True in order for the program to run.
+
+Then run ./cartwall.py somefilename.json to see what happens. You can edit
+things by right-clicking them; then the "Refresh" button will change to "Save".
+If you click Save, it will write the file you specified on the command line; if
+you quit the program and run it again, it will then read that file in again.
+
+The editor is a bit rudimentary - note that the default background colour is
+black, so you will have to change it to make a cart visible!
+
+The "Refresh" button might not do what you expect - in fact, it quits the
+program (albeit with a different exit code to "Log out"). The reason for this
+is that we used Cartwall in a loop at URN to fetch a user's configuration,
+write it to a file, and run Cartwall to use it; Log out returned the user to
+the login screen, whereas Refresh just fetched their configuration again and
+ran Cartwall again straight away. I'm still trying to find a more sensible
+alternative to put there.
+
 BUGS AND TODO
 =============
 
-Documentation needs to be written.
+Some better documentation is needed.
 
-It would be preferable to have a better configuration file format. This one was
-designed to be very quickly generated and parsed by software, with little
-regard for human-readability or backwards/forwards compatibility.
+It doesn't prompt you to save if you try to log out with a modified file.
+
+If you log out, it quits immediately, even if files are still playing.
+
+The "Refresh" button is confusing.
 
 LICENCE
 =======
 
-Copyright (c) 2009 - 2013 Thomas Preece
+Copyright (c) 2009 - 2014 Thomas Preece
 
 You may freely use this software under the conditions of the MIT licence 
 - see the LICENCE file for details.
@@ -71,6 +88,8 @@ format.
 
 VERSION HISTORY
 ===============
+
+v 0.5 (2014-02-14) - update file format to working JSON; add some editing tools
 
 v 0.4 (2013-05-08) - replace audio code with playstopaudio library
 
