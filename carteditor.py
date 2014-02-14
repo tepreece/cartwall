@@ -20,6 +20,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from Tkinter import *
+from config import *
 
 class CartEditor():
 	def __init__(self, root, cart):
@@ -42,7 +43,7 @@ class CartEditor():
 		self.subtitle.insert(0, cart.subtitle)
 		
 		Label(body, text='Audio Directory:').grid(in_=body, row=2, sticky=E)
-		Label(body, text='/somewhere/').grid(in_=body, row=2, column=1, sticky=W)
+		Label(body, text=AUDIODIR).grid(in_=body, row=2, column=1, sticky=W)
 		
 		Label(body, text='Audio File:').grid(in_=body, row=3, sticky=E)
 		self.audiofile = Entry(body)

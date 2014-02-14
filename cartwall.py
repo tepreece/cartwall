@@ -26,17 +26,41 @@ import string
 import sys
 import os
 from Tkinter import *
+import tkMessageBox
 from playstopaudio import playstopaudio
 
 from config import *
 import cart
+import buttoneditor
 
-BTNCOL = range(5)
-BTNHL = range(5)
+# How many carts?
+ROWS = 6
+COLS = 6
+
+class PageButton(Button):
+	def setup(self, root, controller):
+		self.root = root
+		self.controller = controller
+		self.menu = Menu(tearoff=0)
+		self.menu.add_command(label='Edit...', command=self.edit)
+		self.bind('<Button-3>', self.popup)
+	
+	def popup(self, event):
+		self.menu.post(event.x_root, event.y_root)
+	
+	def edit(self):
+		buttoneditor.ButtonEditor(self.root, self)
+	
+	def setactive(self, active):
+		self.active = active
+		
+		if self.active:
+			self.configure(relief=SUNKEN, background=self.highlight, activebackground=self.highlight)
+		else:
+			self.configure(relief=RAISED, background=self.color, activebackground=self.color)
 
 class Gui:
 	def __init__(self, master, fname):
-		global BTNCOL, BTNHL
 		# save the master, and filename
 		self.master = master
 		self.fname = fname
@@ -56,9 +80,16 @@ class Gui:
 		
 		# open and process the config file
 		self.carts = [[], [], [], [], []]
-		f = open(self.fname, 'r')
-		self.json = json.load(f)
-		f.close()
+		
+		try:
+			f = open(self.fname, 'r')
+			self.json = json.load(f)
+			f.close()
+			show_welcome = False
+		except:
+			# file doesn't exist or isn't valid JSON - make it empty
+			self.json = []
+			show_welcome = True
 		
 		# create the carts
 		for x in xrange(5):
@@ -75,8 +106,7 @@ class Gui:
 		
 		# create the buttons
 		self.buttons = []
-		self.buttontitles = []
-		
+
 		bfont = BTN_FONT
 		smallbfont = SMALLBTN_FONT
 		
@@ -93,28 +123,32 @@ class Gui:
 		
 		for i in xrange(5):
 			try:
-				BTNCOL[i] = self.json[i]['color']
+				color = self.json[i]['color']
 			except:
-				BTNCOL[i] = BTN_COLOR
+				color = BTN_COLOR
 			try:
-				BTNHL[i] = self.json[i]['highlight']
+				highlight = self.json[i]['highlight']
 			except:
-				BTNHL[i] = BTN_HL
+				highlight = BTN_HL
 			try:
 				title = self.json[i]['title']
 			except:
 				title = 'Page '+str(i+1)
 			
-			self.buttontitles.append(title)
-			self.buttons.append(Button(
+			self.buttons.append(PageButton(
 				text=title,
 				width=1, height=BTN_HEIGHT, borderwidth=BTN_BORDER,
 				takefocus=False,
 				font=bfont, wraplength=BTN_WRAPLENGTH,
-				bg=BTNCOL[i],
-				activebackground=BTNCOL[i],
+				bg=color,
+				activebackground=color,
 				command=select_page_lambda[i]
 			))
+			self.buttons[i].setup(master, self)
+			self.buttons[i].color = color
+			self.buttons[i].highlight = highlight
+			self.buttons[i].title = title
+			self.buttons[i].active = False
 		
 		self.reloadbutton = Button(
 			text=REFRESH,
@@ -148,6 +182,10 @@ class Gui:
 		self.activebutton = self.buttons[0]
 		self.activeindex = 0
 		self.select_page(0)
+		
+		if show_welcome:
+			tkMessageBox.showinfo('Welcome to Cartwall!',
+			'Welcome to Cartwall!\n\nYou\'re editing a new cartwall - right-click any cart or page button to edit it!')
 
 		# start timer
 		self.tick()
@@ -155,7 +193,7 @@ class Gui:
 	def select_page(self, idx):
 		# remove the old active components
 		self.activeframe.grid_forget()
-		self.activebutton.configure(relief=RAISED, background=BTNCOL[self.activeindex], activebackground=BTNCOL[self.activeindex])
+		self.activebutton.setactive(False)
 		
 		# set the active components
 		self.activeframe = self.frames[idx]
@@ -164,7 +202,7 @@ class Gui:
 		
 		# place/update the new active components
 		self.activeframe.grid(row=0, column=0, rowspan=6)
-		self.activebutton.configure(relief=SUNKEN, background=BTNHL[idx], activebackground=BTNHL[idx])
+		self.activebutton.setactive(True)
 	
 	def tick(self):
 		for x in xrange(5):
@@ -193,16 +231,13 @@ class Gui:
 		for x in xrange(5):
 			self.json.append({
 				'id' : x,
-				'title' : self.buttontitles[x],
-				'color' : BTNCOL[x],
-				'highlight' : BTNHL[x]
+				'title' : self.buttons[x].title,
+				'color' : self.buttons[x].color,
+				'highlight' : self.buttons[x].highlight
 			})
 			
 			for i in xrange(36):
 				self.json[x][i] = self.carts[x][i].get_json()
-		#for x in xrange(5):
-		#	for i in xrange(36):
-		#		self.json[x][i] = self.carts[x][i].get_json()
 		
 		f = open(self.fname, 'w')
 		json.dump(self.json, f)
@@ -241,9 +276,17 @@ def logout():
 	exitcode = 0
 	root.quit()
 
+if not CONFIG_SET:
+	tkMessageBox.showerror('Cartwall', 'This cartwall has not been configured!\n\nSet CONFIG_SET = True in config.py before continuing.')
+	sys.exit(255)
+
+if len(sys.argv) < 2:
+	tkMessageBox.showerror('Cartwall', 'No cartwall file specified!')
+	sys.exit(255)
+
 cart.load_images()
-app = Gui(root, CONFIGFILE)
 root.title('Cartwall')
+app = Gui(root, sys.argv[1])
 root.mainloop()
 
 sys.exit(exitcode)

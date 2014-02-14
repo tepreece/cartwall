@@ -20,42 +20,23 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # 
-# You can customize your Cartwall by changing the rest of this file.
+# You must set CONFIG_SET = True to confirm that you have read the configuration
+# file and updated it as required. You can then customize your Cartwall by
+# changing the rest of this file.
 # 
 
+CONFIG_SET = False
+
 # Specify the audio libraries for playstopaudio to try
-AUDIO_LIBRARIES = ['audiere']
+AUDIO_LIBRARIES = ['audiere', 'gstreamer']
 
 # Audio sample rate. You should usually leave this as 44100 unless you know
 # you need something different. Note that if your audio files are encoded at a
 # different sample rate, they will play back at the wrong speed.
 SAMPLERATE = 44100
 
-# Where is the configuration file?
-CONFIGFILE = './carts.json'
-
-# Is it a legacy or JSON config file?
-CONFIG_LEGACY = False
-
-# Where are the audio files stored? You must add a trailing slash.
+# Where are the audio files stored? You must include a trailing slash.
 AUDIODIR = './'
-
-# What is the extension of the audio files? If all your files are the same
-# format, it may be convenient to set this, and then just provide the "audio ID"
-# in the configuration file. If you have audio of more than one format, set it
-# to blank and provide the extension for each audio file in the config file.
-AUDIOEXT = '.ogg'
-
-# Should the audio be streamed from disk (True) or loaded into memory when the
-# program starts (False)? Loading into memory is safer, but will result in a
-# long start up time, particularly if you use large audio files.
-AUDIO_STREAM_FROM_DISK = True
-
-# How many carts do you want per page? If too many carts are specified in the
-# configuration file, they will be ignored, but if too few are specified, the
-# program will not work.
-ROWS = 6
-COLS = 6
 
 # Default colors
 EMPTY_COLOR = 'black'	# Color of an empty cart
@@ -63,24 +44,21 @@ BG_COLOR = 'cyan'		# Default background color
 FG_COLOR = 'black'		# Foreground (ie, text) color
 PLAY_COLOR = 'green'	# Background color of a playing cart
 EOF_COLOR = '#cccccc'	# Flash this color for EOF warning
+BTN_COLOR = '#f44e15'
+BTN_HL = '#f49b7b'
+
+# Colors for the small buttons (Refresh / Save, Log Out)
+SMALLBTN_COLOR = 'white'
+SMALLBTN_HL = 'white'
+
+# Texts for the small buttons
+REFRESH = 'Refresh'
+SAVE = 'Save'
+LOGOUT = 'Log Out'
 
 # How many seconds before the end of the file should we start the EOF warning?
 # Set to 0 to disable.
 EOF_TIME = 5
-
-# Page buttons. There are five pages; from version 0.2 onwards, the colours are
-# specified in the configuration file. For version 0.1 or earlier, the colours
-# are defined here. The "HL" (highlight) color is used when for the active page.
-LEGACY_BTN_COLOR = ('#f44e15','#f44e15', '#497ed6', '#497ed6', '#497ed6')
-LEGACY_BTN_HL = ('#f49b7b', '#f49b7b', '#8ea7e6', '#8ea7e6', '#8ea7e6')
-
-# Default button colours
-BTN_COLOR = '#f44e15'
-BTN_HL = '#f49b7b'
-
-# Colors for the small buttons (Refresh / Log Out)
-SMALLBTN_COLOR = 'white'
-SMALLBTN_HL = 'white'
 
 # Sizes and dimensions. The size of the overall window is set based on the
 # smallest area everything can fit into. The defaults work for a 1280*1024 px
@@ -100,11 +78,6 @@ LOGOUT_WIDTH = 7								# Relative width of the Log Out button
 SMALLBTN_HEIGHT = 3								# Height of a button, relative to font size
 SMALLBTN_BORDER = 14							# Border width of the buttons
 SMALLBTN_WRAPLENGTH = 100						# Wrap length for the button text
-
-# Texts for the Refresh and Log Out buttons
-REFRESH = 'Refresh'
-SAVE = 'Save'
-LOGOUT = 'Log Out'
 
 # Cart layout. All of these settings define what a cart looks like and how the
 # various elements are positioned. You may need to tweak them to find optimum
@@ -143,7 +116,7 @@ COMMAND_X = 54
 COMMAND_Y = 164
 
 # Positions of the various texts. Captions are anchored at the top-left,
-# and the timer is anchoredat the bottom-right
+# and the timer is anchored at the bottom-right
 CAP1_X = 6
 CAP1_Y = 4
 

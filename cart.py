@@ -65,10 +65,11 @@ class Cart(Canvas):
 		self.set_json(json)
 		self.setup_display()
 		self.bind('<Button-1>', self.onClick)
-		self.bind("<Button-3>", self.popup)
+		self.bind('<Button-3>', self.popup)
 		
 		self.menu = Menu(self, tearoff=0)
-		self.menu.add_command(label="Edit...", command=self.edit)
+		self.menu.add_command(label='Edit...', command=self.edit)
+		self.menu.add_command(label='Clear', command=self.clear)
 	
 	def set_json(self, json):
 		self.json = json
@@ -295,7 +296,19 @@ class Cart(Canvas):
 		self.update()
 	
 	def edit(self):
-		ce = carteditor.CartEditor(self.controller.master, self)
+		carteditor.CartEditor(self.controller.master, self)
+	
+	def clear(self):
+		self.bgcolor = EMPTY_COLOR
+		self.fgcolor = EMPTY_COLOR
+		self.title = ''
+		self.subtitle = ''
+		self.stopother = -1
+		self.command = ''
+		self.submit_play = False
+		self.audiofile = ''
+		self.sound = NullSound()
+		self.controller.set_modified(True)
 
 
 
